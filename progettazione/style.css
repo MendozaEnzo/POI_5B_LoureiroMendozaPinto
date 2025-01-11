@@ -44,8 +44,33 @@
     color: white;
 }
 
+.div-home{
+    margin: 20px 20px;
+}
+
+.home-btn{
+    background-color: green; 
+    border-radius: 4px; 
+    padding: 8px 14px;
+    text-align: center; 
+    color: white;
+}
+
 .container{
     margin: 10px 1px;
+}
+
+.home-container{
+    position: fixed;
+    top: 50%;
+    left: 50%;   
+    margin:30px 20px;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 10px;
+    text-align: center;
 }
 
 .flex-container{
