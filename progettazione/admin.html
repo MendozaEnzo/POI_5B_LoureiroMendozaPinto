@@ -4,15 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amministrazione</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" 
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" 
+    crossorigin="anonymous">
+
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav>
-        <a href="homepage.html">Home</a>
+    <nav class="flex-container">
+        <div>
+            <a class="home" href="homepage.html">Home</a>
+        </div>
+
+        <div>
+            <button class="destro btn btn-primary">Login</button>
+        </div>
+        
     </nav>
 
-    <h1>Area Amministrativa</h1>
-    <p>Gestisci i punti di interesse.</p>
+    <div class="container">
+        <h1>Area Amministrativa</h1>
+        <p>Gestisci i punti di interesse.</p>
 
-    <a href="homepage.html">Esci</a>
+        <a class="home" href="homepage.html">Esci</a>
+    </div>
+    
 </body>
 </html>
