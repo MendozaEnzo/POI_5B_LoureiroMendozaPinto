@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amministrazione</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" 
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" 
+    crossorigin="anonymous">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="flex-container">
+        <div>
+            <a class="home" href="homepage.html">Home</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Area Amministrativa</h1>
+            <h2>Gestione Punti di Interesse</h2>
+            
+            
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Luogo</th>
+                        <th>Descrizione</th>
+                        <th>Immagine</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><a href="detail.html">Piazza S. Fedele (Milano)</a></td>
+                        <td>
+                            Come è noto la chiesa di San Fedele è il luogo dove Alessandro Manzoni, la cui casa dista pochi metri, si reca a pregare ogni giorno, compresa la mattina del 6 gennaio 1873...
+                        </td>
+                        <td><a href="detail.html"><img src="https://hips.hearstapps.com/hmg-prod/images/san-fedele-square-in-the-morning-with-the-statue-of-royalty-free-image-1667550277.jpg" width="100" height="100" alt="Piazza San Fedele"></a></td>
+                        <td>
+                            
+                            <form  method="post">
+                                <input type="hidden" name="action" value="edit">
+                                <input type="hidden" name="place_id" value="1">
+                                <button type="submit" class="btn btn-warning">Modifica</button>
+                            </form>
+
+                            
+                            <form  method="post">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="place_id" value="1">
+                                <button type="submit" class="btn btn-danger">Elimina</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="mb-3">
+                <form method="post">
+                    <input type="hidden" name="action" value="add">
+                    <button type="submit" class="btn btn-success">Aggiungi Nuovo Punto</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
