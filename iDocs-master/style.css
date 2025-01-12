@@ -44,6 +44,14 @@
     color: white;
 }
 
+.login-btn{
+    background-color: cornflowerblue; 
+    border-radius: 4px; 
+    padding: 8px 14px;
+    text-align: center; 
+    color: white;
+}
+
 .div-home{
     margin: 20px 20px;
 }
@@ -57,7 +65,11 @@
 }
 
 .container{
-    margin: 10px 1px;
+    width: 100%;
+    max-width: 1200px; 
+    margin: 0 auto;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .home-container{
@@ -84,4 +96,8 @@
 .input_css {
     box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
     border: 0;
+}
+
+body {
+    overflow-x: hidden;
 }
