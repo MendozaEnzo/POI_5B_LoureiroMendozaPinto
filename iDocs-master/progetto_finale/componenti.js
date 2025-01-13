@@ -1,3 +1,4 @@
+//componente navigator
 const hide = (elements) => {
     elements.forEach((element) => {
         element.classList.add("hidden");
@@ -32,3 +33,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const parentElement = document.body;
     createNavigator(parentElement);
 });
+//componente mappa
+//creazione iniziale
+let zoom = 12;
+let maxZoom = 19;
+let map = L.map('map').setView([45.4654219,9.1859243], zoom);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+maxZoom: maxZoom,
+attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
+
+const renderMap = () => {
+    download().then((places) => {
+      places.forEach((place) => {
+        const marker = L.marker(place.coords).addTo(map);
+        marker.bindPopup(`
+            <b>${place.name}</b><br>
+            <b>Data:</b> ${place.date}<br>
+            <b>Ora:</b> ${place.time}<br>
+            <b>Feriti:</b> ${place.injured}<br>
+            <b>Morti:</b> ${place.dead}`);
+      });
+    })
+}
