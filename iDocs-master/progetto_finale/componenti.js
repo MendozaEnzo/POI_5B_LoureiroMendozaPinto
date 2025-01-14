@@ -28,11 +28,7 @@ export const createNavigator = (parentElement) => {
     render(); // Esegui il rendering iniziale
 };
 
-// Collegamento del navigatore
-document.addEventListener("DOMContentLoaded", () => {
-    const parentElement = document.body;
-    createNavigator(parentElement);
-});
+
 //componente mappa
 //creazione iniziale
 let zoom = 12;
@@ -56,3 +52,73 @@ const renderMap = () => {
       });
     })
 }
+// Componente Login
+const createLogin = () => {
+    const inputName = document.querySelector("#name");
+    const inputPassword = document.querySelector("#password");
+    const loginButton = document.querySelector("#login");
+    const divPrivate = document.querySelector("#private");
+    const divLogin = document.querySelector("#login-container"); // Aggiunto un id corretto
+
+    let isLogged = sessionStorage.getItem("Logged") === "true";
+
+    // Imposta la visibilità iniziale
+    const updateUI = () => {
+        if (isLogged) {
+            divPrivate.classList.remove("hidden");
+            divPrivate.classList.add("visible");
+            divLogin.classList.add("hidden");
+        } else {
+            divPrivate.classList.add("hidden");
+            divPrivate.classList.remove("visible");
+            divLogin.classList.remove("hidden");
+        }
+    };
+
+    updateUI();
+
+    const login = (name, password) => {
+        return fetch("http://ws.cipiaceinfo.it/credential/login", { 
+            method: "POST",
+            headers: {
+                "content-type": "application/json",
+                "key": token // Assumendo che `token` sia definito altrove
+            },
+            body: JSON.stringify({
+                username: name,
+                password: password
+            })
+        })
+        .then(response => response.json())
+        .then(data => data.result)
+        .catch(error => {
+            console.error("Errore nel login:", error);
+            return false;
+        });
+    };
+
+    loginButton.onclick = () => {
+        const username = inputName.value.trim();
+        const password = inputPassword.value.trim();
+
+        if (!username || !password) {
+            alert("Inserisci nome utente e password.");
+            return;
+        }
+
+        login(username, password).then((result) => {
+            if (result) {
+                isLogged = true;
+                sessionStorage.setItem("Logged", "true");
+                updateUI();
+            } else {
+                alert("Credenziali errate!");
+            }
+        });
+    };
+
+    return {
+        isLogged: () => isLogged
+    };
+};
+
