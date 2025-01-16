@@ -15,11 +15,14 @@ export const createNavigator = (parentElement) => {
 
    const render = () => {
        const url = new URL(document.location.href);
-       const pageName = url.hash.replace("#", "") || "pagina1"; // Se non c'è hash, vai su pagina1
+       const pageName = url.hash.replace("#", "") || "homepage"; // Imposta 'homepage' come predefinito
+
+       // Trova la pagina da mostrare in base all'ID nell'URL hash
        const selected = pages.find((page) => page.id === pageName) || pages[0];
 
-       hide(pages); // Nascondi tutte le pagine
-       show(selected); // Mostra la pagina selezionata
+       // Nascondi tutte le pagine e mostra quella selezionata
+       hide(pages);
+       show(selected);
    };
 
    // Gestisce il caricamento iniziale e il cambio di hash

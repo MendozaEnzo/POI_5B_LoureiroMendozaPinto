@@ -6,15 +6,6 @@
    display: none;
 }
 #map {
-   height: 100%; /* La mappa occupa tutta l'altezza del contenitore */
-   width: 100%;  /* La mappa occupa tutta la larghezza del contenitore */
+   width: 600px;
+   height: 600px;
 }
-
-#container {
-   display: flex;
-   flex-direction: column;
-   height: 100vh;  /* Usa tutta l'altezza della finestra */
-   padding: 0;
-   margin: 0;
-}
-
