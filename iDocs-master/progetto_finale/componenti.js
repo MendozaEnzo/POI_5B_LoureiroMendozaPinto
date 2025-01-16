@@ -32,18 +32,17 @@ let places = [
 
 
  //componte tabella dinamica 
- function createTable() {
+// Componente tabella dinamica
+function createTable() {
     const container = document.getElementById('table');
-    
-    // Dati fittizi dei luoghi
+
     const places = [
-      { id: 1, name: 'Piazza S. Fedele (Milano)', description: 'La chiesa di San Fedele è famosa...' },
-      { id: 2, name: 'Colosseo (Roma)', description: 'Il Colosseo è un antico anfiteatro di Roma...' },
-      { id: 3, name: 'Piazza del Duomo (Firenze)', description: 'La piazza del Duomo di Firenze è famosa per la cattedrale...' }
+        { id: 1, name: 'Piazza S. Fedele (Milano)', description: 'La chiesa di San Fedele è famosa...' },
+        { id: 2, name: 'Colosseo (Roma)', description: 'Il Colosseo è un antico anfiteatro di Roma...' },
+        { id: 3, name: 'Piazza del Duomo (Firenze)', description: 'La piazza del Duomo di Firenze è famosa per la cattedrale...' }
     ];
-    
-    // Crea la tabella con il filtro
-    let tableHtml = `
+
+    container.innerHTML = `
       <input type="text" id="FiltroInput" placeholder="Cerca per luogo">
       <table class="table table-striped">
         <thead>
@@ -58,44 +57,63 @@ let places = [
         </tbody>
       </table>
     `;
-    container.innerHTML = tableHtml;
-  
-    // Filtro
-    document.getElementById('FiltroInput').addEventListener('input', function() {
-      const filter = this.value.toLowerCase();
-      const rows = document.querySelectorAll('tbody tr');
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        if (text.includes(filter)) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
-      });
-    });
-    
-    // Gestisci il cambiamento dell'URL per il dettaglio
-    window.addEventListener('hashchange', function() {
-      const hash = window.location.hash;
-      const id = hash.replace('#dettaglio_', '');
-  
-      if (id) {
+
+    let filtroInput = document.getElementById('FiltroInput');
+
+    filtroInput.oninput = function() {
+        let filtro = this.value.toLowerCase();
+        document.querySelectorAll('tbody tr').forEach(riga => {
+            if (riga.textContent.toLowerCase().includes(filtro)) {
+                riga.style.display = '';
+            } else {
+                riga.style.display = 'none';
+            }
+        });
+    };
+
+    window.onhashchange = handleNavigation;
+}
+
+createTable();
+
+
+// Funzione per gestire la navigazione tra le pagine
+function handleNavigation() {
+    let hash = window.location.hash || "#homepage";
+    document.querySelectorAll(".page").forEach(page => page.style.display = "none");
+
+    if (hash.startsWith("#dettaglio_")) {
+        let id = hash.replace("#dettaglio_", "");
         showDetail(id);
-      }
-    });
-  
-    // Mostra il dettaglio in base all'ID
-    function showDetail(id) {
-      const place = places.find(p => p.id == id);
-      if (place) {
-        const detailContainer = document.getElementById('dettaglio-container');
-        detailContainer.innerHTML = `
-          <h2>${place.name}</h2>
-          <p>${place.description}</p>
-        `;
-      }
+        document.getElementById("dettaglio").style.display = "block";
+    } else {
+        document.querySelector(hash).style.display = "block";
     }
-  }
-  
-  
-  createTable();
+}
+
+// Funzione per mostrare il dettaglio
+function showDetail(id) {
+    const places = [
+        { id: 1, name: 'Piazza S. Fedele (Milano)', description: 'La chiesa di San Fedele è famosa...' },
+        { id: 2, name: 'Colosseo (Roma)', description: 'Il Colosseo è un antico anfiteatro di Roma...' },
+        { id: 3, name: 'Piazza del Duomo (Firenze)', description: 'La piazza del Duomo di Firenze è famosa per la cattedrale...' }
+    ];
+    
+    let place = places.find(p => p.id == id);
+    if (place) {
+        document.getElementById("dettaglio").innerHTML = `
+            <nav class="flex-container">
+                <div>
+                    <a href="#homepage"><button class="btn btn-danger">Home</button></a>
+                </div>
+            </nav>
+            <div class="container">
+                <h1>${place.name}</h1>
+                <p>${place.description}</p>
+            </div>
+        `;
+    }
+}
+
+createTable();
+handleNavigation();
