@@ -1,31 +1,3 @@
-// Funzioni per la gestione della visibilità
-const hide = (elements) => {
-    elements.forEach((element) => {
-        element.classList.add("hidden");
-        element.classList.remove("visible");
-    });
-};
-
-const show = (element) => {
-    element.classList.add("visible");
-    element.classList.remove("hidden");
-};
-
-// Componente Navigatore
-export const createNavigator = (parentElement) => {
-    const pages = Array.from(parentElement.querySelectorAll(".page"));
-
-    const render = () => {
-        const pageName = location.hash.replace("#", "") || "pagina1"; 
-        const selected = pages.find((page) => page.id === pageName) || pages[0];
-
-        hide(pages); 
-        show(selected); 
-    };
-
-    window.addEventListener("hashchange", render); 
-    render();
-};
 
 // Componente Mappa
 let map = L.map('map').setView([45.4654219, 9.1859243], 12);
