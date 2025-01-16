@@ -12,35 +12,106 @@
 </head>
 
 <body>
-   <div id="container" class="container">
-      <div id="pagina1" class="page">
-         <div class="row">
-            <div class="text-center">
-               <h1>Home - Punti di Interesse</h1>
+    <div class="container">
+        <div id="home" class="page">
+            <div style="margin-top: 10px;" class="d-flex justify-content-end mb-4">
+                <a href="#admin"><button class="btn btn-success">Amministrazione</button></a>
             </div>
-           
-           <div class="text-center mb-4">
-               <p>Seleziona il luogo su cui vuoi approfondire i dettagli.</p>
-           </div>
-           <div class="col">
-            <div id="map"></div>
-          </div>
 
-         </div>
-         <div class="row"><a href="#pagina2">Questo è un link a pagina 2</a></div>
-         <div class="row"><a href="#pagina3">Questo è un link a pagina 3</a></div>                  
-      </div>
-      <div id="pagina2" class="page">
-         <div class="row"><a href="#pagina1">Questo è un link a pagina 1</a></div>
-         <div class="row">Questo è il contenuto di pagina 2</div>         
-         <div class="row"><a href="#pagina3">Questo è un link a pagina 3</a></div>                  
-      </div>
-      <div id="pagina3" class="page">         
-         <div class="row"><a href="#pagina1">Questo è un link a pagina 1</a></div>
-         <div class="row"><a href="#pagina2">Questo è un link a pagina 2</a></div>                  
-         <div class="row">Questo è il contenuto di pagina 3</div>
-      </div>
-   </div>
+            <div class="text-center">
+                <h1>Home - Punti di Interesse</h1>
+            </div>
+            
+            <div class="text-center mb-4">
+                <p>Seleziona il luogo su cui vuoi approfondire i dettagli.</p>
+            </div>
+
+            
+            <div class="container row align-items-start">
+                    <div class="col-md-6">
+                        <h2>Tabella</h2>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Luogo</th>
+                                </tr>
+                                <tr>
+                                    <td><a href="#dettaglio">Piazza S. Fedele (Milano)</a></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h2>Mappa</h2>
+                        <img src="assets/images/tpsi_cartina.png" class="img-fluid" alt="Mappa">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="admin" class="page">
+            <nav class="flex-container">
+                <div>
+                    <a href="#home"><button class="btn btn-danger">Home</button></a>
+                </div>
+        
+                <div>
+                    <button id="login" class="btn btn-primary">Login</button>
+                </div>
+            </nav>
+        
+            <div class="container">
+                <h1>Area Amministrativa</h1>
+                <div>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Luogo</th>
+                                <th>Descrizione</th>
+                                <th>Immagine</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Piazza S. Fedele (Milano)</td>
+                                <td>
+                                    Come è noto la chiesa di San Fedele è il luogo dove Alessandro Manzoni, la cui casa dista pochi metri, si reca a pregare ogni giorno, compresa la mattina del 6 gennaio 1873, giorno in cui al termine della messa, forse a causa della nevicata della notte precedente, mentre si avvia alla sua magione scivola sui gradini del sagrato sbattendo violentemente la testa.
+                                    Il monumento ad Alessandro Manzoni, inaugurato nel 1883, è una scultura in bronzo che rappresenta lo scrittore con un libro nella mano sinistra, simbolo del suo contributo alla letteratura italiana. Circondato da dettagli decorativi e iscrizioni commemorative, il monumento continua a essere un punto di riferimento culturale e storico nel cuore di Milano, testimoniando il profondo rispetto e l'ammirazione per il grande autore.
+                                </td>
+                                <td><a href="detail.html"><img src="https://hips.hearstapps.com/hmg-prod/images/san-fedele-square-in-the-morning-with-the-statue-of-royalty-free-image-1667550277.jpg" width="400" height="250" alt="Piazza San Fedele"></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="dettaglio" class="page">
+            <nav class="flex-container">
+                <div>
+                    <a href="#home"><button class="btn btn-danger">Home</button></a>
+                </div>
+            </nav>
+        
+            <div class="container">
+                <h1>Dettaglio Punto di Interesse</h1>
+            <p>Come è noto la chiesa di San Fedele è il luogo dove Alessandro Manzoni, la cui casa dista pochi metri, si reca a pregare ogni giorno, compresa la mattina del 6 gennaio 1873, giorno in cui al termine della messa, forse a causa della nevicata della notte precedente, mentre si avvia alla sua magione scivola sui gradini del sagrato sbattendo violentemente la testa.
+                Il monumento ad Alessandro Manzoni, inaugurato nel 1883, è una scultura in bronzo che rappresenta lo scrittore con un libro nella mano sinistra, simbolo del suo contributo alla letteratura italiana. Circondato da dettagli decorativi e iscrizioni commemorative, il monumento continua a essere un punto di riferimento culturale e storico nel cuore di Milano, testimoniando il profondo rispetto e l'ammirazione per il grande autore.</p>
+                <img src="https://hips.hearstapps.com/hmg-prod/images/san-fedele-square-in-the-morning-with-the-statue-of-royalty-free-image-1667550277.jpg" width="400" height="250" alt="Piazza San Fedele">
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay"></div>
+
+    <div id="form"></div>
+
+    <div id="loginContainer"></div>
+
    <script type="module" src="./navigator.js"></script>
 
 </body>

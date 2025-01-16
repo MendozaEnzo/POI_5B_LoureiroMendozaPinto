@@ -16,6 +16,7 @@ export const createNavigator = (parentElement) => {
     const pages = Array.from(parentElement.querySelectorAll(".page"));
 
     const render = () => {
+        const url = new URL(document.location.href);
         const pageName = location.hash.replace("#", "") || "pagina1"; 
         const selected = pages.find((page) => page.id === pageName) || pages[0];
 

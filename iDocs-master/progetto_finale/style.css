@@ -5,3 +5,75 @@
 .hidden {
    display: none;
 }
+
+#loginContainer{
+   display: none;
+   position: fixed;
+   top: 50%;
+   left: 50%;   
+   transform: translate(-50%, -50%);
+   z-index: 1000;
+   background-color: white;
+   padding: 20px;
+   border-radius: 10px;
+   margin-top: 10px;
+}
+
+#modale {
+   margin-top: 20px;
+   display: none;
+   margin-bottom: 20px;
+   margin-right: 10px;
+} 
+
+#overlay {
+   display: none;
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background-color: rgba(0, 0, 0, 0.5);
+   z-index: 999;
+}
+
+.div-home{
+   margin: 20px 20px;
+}
+
+.container{
+   width: 100%;
+   max-width: 1200px; 
+   margin: 0 auto;
+   padding-left: 15px;
+   padding-right: 15px;
+}
+
+.home-container{
+   position: fixed;
+   top: 50%;
+   left: 50%;   
+   margin:30px 20px;
+   transform: translate(-50%, -50%);
+   background-color: white;
+   padding: 20px;
+   border-radius: 10px;
+   margin-top: 10px;
+   text-align: center;
+}
+
+.flex-container{
+   display: flex;
+   justify-content: space-between;
+   height: 100px;
+   margin:30px;
+   }
+
+.input_css {
+   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
+   border: 0;
+}
+
+body {
+   overflow-x: hidden;
+}
