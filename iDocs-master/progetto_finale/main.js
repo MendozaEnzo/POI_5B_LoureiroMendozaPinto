@@ -1,7 +1,4 @@
-
-import { createNavigator,renderMap,createLogin } from "./componenti";
-
-
+import { createLogin } from "./componenti.js";
 
 const log = createLogin (document.getElementById("loginContainer"))
 log.setLabels([["Username","text"],["Password","password"]]);
