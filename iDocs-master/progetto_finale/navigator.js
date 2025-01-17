@@ -27,7 +27,7 @@ export const createNavigator = (parentElement) => {
 
    // Gestisce il caricamento iniziale e il cambio di hash
    window.addEventListener("hashchange", render); // Reagisci al cambio di hash
-   render(); // Esegui il rendering iniziale
+   render(); 
 };
 
 // Collegamento del navigatore
