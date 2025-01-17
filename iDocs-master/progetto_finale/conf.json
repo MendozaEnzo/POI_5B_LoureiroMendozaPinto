@@ -2,6 +2,6 @@
     "token":"ec5028ca-f16f-4528-9d0e-bf57e3b03ef7",
     "url" : "https://ws.cipiaceinfo.it/cache/",
     "key" : "POI1",
-    "geoUrl":"https://us1.locationiq.com/v1/search?key=pk.51de02ca59420a8535ff19bd59504a69&q=$LUOGO&format=json&"
+    "tokenMap":"pk.51de02ca59420a8535ff19bd59504a69"
 
 }
