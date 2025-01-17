@@ -3,9 +3,9 @@ import { handleNavigation } from "./function.js";
 
 
 // Componente Mappa
-let zoom = 6;  // Zoom per vedere l'Europa
+let zoom = 5;  // Zoom per vedere l'Europa
 let maxZoom = 19;
-let map = L.map('map').setView([50, 10], zoom); // Centro sull'Europa
+let map = L.map('map').setView([42.5, 13], zoom); // Centro sull'Europa
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: maxZoom,
@@ -15,7 +15,7 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
  
 
 
- //componte tabella dinamica 
+ 
 // Componente tabella dinamica
 function createTable() {
     const container = document.getElementById('table');
@@ -28,12 +28,11 @@ function createTable() {
 
     container.innerHTML = `
       <input type="text" id="FiltroInput" placeholder="Cerca per luogo">
-      <table class="table table-striped">
+      <table widht="50%" class="table table-striped">
         <thead>
           <tr>
             <th>ID</th>
             <th>Luogo</th>
-            <th>Descrizione</th>
           </tr>
         </thead>
         <tbody>
@@ -41,7 +40,6 @@ function createTable() {
             <tr>
               <td>${place.id}</td>
               <td><a href="#dettaglio_${place.id}" class="detail-link">${place.name}</a></td>
-              <td>${place.description}</td>
             </tr>
           `).join('')}
         </tbody>
