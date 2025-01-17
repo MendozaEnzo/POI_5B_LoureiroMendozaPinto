@@ -7,10 +7,12 @@
 }
 #map {
    width: 90;
-   height: 600px;
+   height: 400px;
 }
-#table{
-   width: 1300px;
+
+#table {
+   overflow-y: scroll;
+   height: 400px;
 }
 
 .flex-container{
@@ -20,3 +22,4 @@
    height: 10px;
    margin:30px 20px;
    }
+
