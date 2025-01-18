@@ -1,5 +1,5 @@
-import { handleNavigation,login_fetch,addNewPlaceToMap,addNewPlaceToTable,loadConfig } from "./function.js";
-
+import { handleNavigation,login_fetch,addNewPlaceToMap,addNewPlaceToTable,loadConfig,getCoordinates,addMarker,updatePlaceInMap,updatePlaceInTable,removePlaceFromMap,removePlaceFromTable } from "./function.js";
+import {download,upload} from "./cache.js";
 // Componente Mappa
 let zoom = 5;  // Zoom per vedere l'Europa
 let maxZoom = 19;
@@ -62,22 +62,24 @@ export function createTable() {
 
 export function createTableAdmin() {
   const container = document.getElementById('tableAdmin');
+  const isLoggedIn = Cookies.get('Username'); // Verifica se l'utente è loggato
 
   const places = [
-      { id: uuid.v4(), name: 'Piazza S. Fedele (Milano)', description: 'La chiesa di San Fedele è famosa...', img: 'https://www.milanofree.it/images/stories/foto_storiche_milano/porta_venezia_1876_inaugurazione_ippovia_per_monza.jpg' },
-      { id: uuid.v4(), name: 'Colosseo (Roma)', description: 'Il Colosseo è un antico anfiteatro di Roma...', img: 'https://www.milanofree.it/images/stories/foto_storiche_milano/porta_venezia_1876_inaugurazione_ippovia_per_monza.jpg' },
-      { id: uuid.v4(), name: 'Piazza del Duomo (Firenze)', description: 'La piazza del Duomo di Firenze è famosa per la cattedrale...', img: 'https://www.milanofree.it/images/stories/foto_storiche_milano/porta_venezia_1876_inaugurazione_ippovia_per_monza.jpg' }
+    { id: uuid.v4(), name: 'Piazza S. Fedele (Milano)', description: 'La chiesa di San Fedele è famosa...', img: 'https://www.milanofree.it/images/stories/foto_storiche_milano/porta_venezia_1876_inaugurazione_ippovia_per_monza.jpg' },
+    { id: uuid.v4(), name: 'Colosseo (Roma)', description: 'Il Colosseo è un antico anfiteatro di Roma...', img: 'https://www.milanofree.it/images/stories/foto_storiche_milano/porta_venezia_1876_inaugurazione_ippovia_per_monza.jpg' },
+    { id: uuid.v4(), name: 'Piazza del Duomo (Firenze)', description: 'La piazza del Duomo di Firenze è famosa per la cattedrale...', img: 'https://www.milanofree.it/images/stories/foto_storiche_milano/porta_venezia_1876_inaugurazione_ippovia_per_monza.jpg' }
   ];
 
   container.innerHTML = `
     <input type="text" id="FiltroInputAdmin" placeholder="Cerca per luogo">
-    <table widht="50%" class="table table-striped">
+    <table width="50%" class="table table-striped">
       <thead>
         <tr>
           <th>ID</th>
           <th>Luogo</th>
           <th>Descrizione</th>
           <th>Immagine</th>
+          ${isLoggedIn ? '<th>Azioni</th>' : ''} <!-- Include la colonna "Azioni" solo se loggato -->
         </tr>
       </thead>
       <tbody>
@@ -87,27 +89,36 @@ export function createTableAdmin() {
             <td><a href="#dettaglio_${place.id}" class="detail-link">${place.name}</a></td>
             <td>${place.description}</td>
             <td><img class="imgAdmin" src="${place.img}" alt="${place.name}" /></td>
+            ${isLoggedIn ? `
+              <td>
+                <button onclick="editPlace('${place.id}')">Modifica</button>
+                <button onclick="deletePlace('${place.id}')">Elimina</button>
+              </td>
+            ` : ''}
           </tr>
         `).join('')}
       </tbody>
     </table>
   `;
 
+  // Filtro per la ricerca
   let filtroInputAdmin = document.getElementById('FiltroInputAdmin');
-
-  filtroInputAdmin.oninput = function() {
-      let filtro = this.value.toLowerCase();
-      document.querySelectorAll('tbody tr').forEach(riga => {
-          if (riga.textContent.toLowerCase().includes(filtro)) {
-              riga.style.display = '';
-          } else {
-              riga.style.display = 'none';
-          }
-      });
+  filtroInputAdmin.oninput = function () {
+    let filtro = this.value.toLowerCase();
+    document.querySelectorAll('tbody tr').forEach(riga => {
+      if (riga.textContent.toLowerCase().includes(filtro)) {
+        riga.style.display = '';
+      } else {
+        riga.style.display = 'none';
+      }
+    });
   };
 
   window.onhashchange = handleNavigation;
 }
+
+
+
 
 createTableAdmin();
 createTable();
@@ -174,100 +185,99 @@ export const createLogin = (elem) => {
 
 // Componente Form di Aggiunta Luogo
 
+// Componente Form di Aggiunta Luogo
 export function createForm() {
   const formContainer = document.getElementById('form');
   const addButton = document.getElementById('add');
 
   addButton.onclick = () => {
-    // Mostra il form per aggiungere il luogo
-    formContainer.innerHTML = `
-      <h3>Aggiungi un nuovo luogo</h3>
-      <form id="addPlaceForm">
-          <div>
-              <label for="placeName">Nome Luogo</label>
-              <input type="text" id="placeName" required />
-          </div>
-          <div>
-              <label for="placeDescription">Descrizione</label>
-              <textarea id="placeDescription" required></textarea>
-          </div>
-          <div>
-              <label for="placeImage">URL Immagine</label>
-              <input type="url" id="placeImage" required />
-          </div>
-          <div>
-              <button type="submit" class="btn btn-success">Aggiungi Luogo</button>
-              <button type="button" class="btn btn-danger" id="cancelAdd">Annulla</button>
-          </div>
-      </form>
-    `;
+      // Mostra il form per aggiungere il luogo
+      formContainer.innerHTML = `
+          <h3>Aggiungi un nuovo luogo</h3>
+          <form id="addPlaceForm">
+              <div>
+                  <label for="placeName">Nome Luogo</label>
+                  <input type="text" id="placeName" required />
+              </div>
+              <div>
+                  <label for="placeDescription">Descrizione</label>
+                  <textarea id="placeDescription" required></textarea>
+              </div>
+              <div>
+                  <label for="placeImage">URL Immagine</label>
+                  <input type="url" id="placeImage" required />
+              </div>
+              <div>
+                  <button type="submit" class="btn btn-success">Aggiungi Luogo</button>
+                  <button type="button" class="btn btn-danger" id="cancelAdd">Annulla</button>
+              </div>
+          </form>
+      `;
 
-    // Annulla l'aggiunta e chiudi il form
-    document.getElementById('cancelAdd').onclick = () => {
-        formContainer.innerHTML = '';  // Rimuove il form
-    };
+      // Gestisce l'annullamento del form
+      document.getElementById('cancelAdd').onclick = () => {
+          formContainer.innerHTML = ''; // Rimuove il form
+      };
 
-    // Gestisci il submit del form
-    document.getElementById('addPlaceForm').onsubmit = (event) => {
-        event.preventDefault();
+      // Gestisce il submit del form
+      document.getElementById('addPlaceForm').onsubmit = (event) => {
+          event.preventDefault();
 
-        const name = document.getElementById('placeName').value;
-        const description = document.getElementById('placeDescription').value;
-        const image = document.getElementById('placeImage').value;
+          const name = document.getElementById('placeName').value;
+          const description = document.getElementById('placeDescription').value;
+          const img = document.getElementById('placeImage').value;
 
-        // Carica il tokenMap dal file di configurazione
-        loadConfig()
-            .then(tokenMap => {
-                if (!tokenMap) {
-                    alert("Token di geocodifica mancante!");
-                    return;
-                }
+          // Ottiene le coordinate del luogo
+          getCoordinates([name])
+              .then((location) => {
+                  // Crea l'oggetto del nuovo luogo
+                  const newPlace = {
+                      id: uuid.v4(),
+                      name,
+                      description,
+                      img,
+                      coords: location.coords
+                  };
 
-                // Crea una promessa per geocodificare il nome del luogo
-                let placeQuery = `${name}, Europa`;  // Aggiungi un paese per geocodificare meglio
-                let url = `https://us1.locationiq.com/v1/search?key=${tokenMap}&q=${encodeURIComponent(placeQuery)}&format=json`;
+                  // Aggiunge il luogo alla tabella e alla mappa
+                  addNewPlaceToTable(newPlace);
+                  addMarker([newPlace]); // Aggiunge il marker alle mappe (homepage e admin)
 
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            throw new Error("Impossibile geocodificare il luogo");
-                        } else {
-                            const lat = data[0].lat;
-                            const lon = data[0].lon;
-                            return { lat, lon };
-                        }
-                    })
-                    .then(location => {
-                        // Una volta che la promessa è risolta, crea il nuovo luogo
-                        const newPlace = { 
-                            id: uuid.v4(), 
-                            name, 
-                            description, 
-                            img: image,
-                            coords: [location.lat, location.lon]  // Usa le coordinate ottenute
-                        };
+                  // Recupera i luoghi dalla cache
+                  download()
+                      .then((cachedPlaces) => {
+                          cachedPlaces = cachedPlaces || [];
 
-                        // Aggiungi il nuovo luogo alla tabella e mappa
-                        addNewPlaceToTable(newPlace);
-                        addNewPlaceToMap(newPlace);
+                          // Aggiunge il nuovo luogo alla lista dei luoghi
+                          cachedPlaces.push(newPlace);
 
-                        // Pulisci il form dopo l'aggiunta
-                        formContainer.innerHTML = '';
-                        alert("Luogo aggiunto con successo!");
-                    })
-                    .catch(err => {
-                        console.error("Errore durante l'aggiunta del luogo:", err);
-                        alert("Si è verificato un errore. Controlla i dettagli.");
-                    });
-            })
-            .catch(err => {
-                console.error("Errore nel caricamento del token:", err);
-            });
-    };
+                          // Salva i luoghi aggiornati nella cache
+                          upload(cachedPlaces)
+                              .then(() => {
+                                  console.log("Luogo salvato nella cache con successo!");
+                              })
+                              .catch((error) => {
+                                  console.error("Errore durante il salvataggio nella cache:", error);
+                              });
+                      })
+                      .catch((error) => {
+                          console.error("Errore durante il recupero dei luoghi dalla cache:", error);
+                      });
+
+                  // Pulisce il form
+                  formContainer.innerHTML = '';
+                  alert("Luogo aggiunto con successo!");
+              })
+              .catch((error) => {
+                  console.error("Errore durante l'aggiunta del luogo:", error);
+                  alert("Si è verificato un errore. Controlla i dettagli.");
+              });
+      };
   };
 }
 
-
 // Inizializza il form
 createForm();
+
+
+

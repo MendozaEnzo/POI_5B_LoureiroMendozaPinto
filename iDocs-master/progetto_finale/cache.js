@@ -2,6 +2,7 @@ const upload = (data) => {
     return new Promise((resolve)=>{
       fetch("conf.json").then(r => r.json()).then(confData => {
         try{
+          console.log("Dati inviati al server per il salvataggio:", data);
           fetch(confData.url + "set", {
             method: "POST",
             headers: {
@@ -26,6 +27,7 @@ const download = () => {
     return new Promise((resolve,reject)=>{
         fetch("conf.json").then(r => r.json()).then(confData => {
             try{
+
                 fetch(confData.url + "get", {
                     method: "POST",
                     headers: {

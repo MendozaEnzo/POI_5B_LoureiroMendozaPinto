@@ -1,4 +1,4 @@
-
+import { upload,download } from "./cache.js";
 
 export const getCoordinates = (luogo) => {
     console.log(luogo);
@@ -13,14 +13,34 @@ export const getCoordinates = (luogo) => {
     })
 };
 
-export const addMarker = (places) => {
+export function addMarker(places) {
+    if (!window.map|| typeof window.map.addLayer !== 'function') {
+        console.error("Errore: la mappa non è stata inizializzata correttamente.");
+        return;
+    }
+    console.log('Mappa:', window.map);
+    console.log('Luoghi salvati:', cachedPlaces);
+
     places.forEach((place) => {
-        const marker = L.marker(place.coords).addTo(map);
-        marker.bindPopup(`
-            <b>${place.name}</b><br>
-        `);
+        // Verifica che coords sia un array valido con due valori (lat, lng)
+        if (Array.isArray(place.coords) && place.coords.length === 2) {
+            const [lat, lng] = place.coords;
+
+            // Crea un marker solo se le coordinate sono numeriche
+            if (!isNaN(lat) && !isNaN(lng)) {
+                const marker = L.marker([parseFloat(lat), parseFloat(lng)]).bindPopup(`
+                    <b>${place.name}</b><br>
+                    ${place.description || "Nessuna descrizione disponibile."}
+                `).addTo(window.map);
+            } else {
+                console.error(`Coordinate non numeriche per il luogo: ${JSON.stringify(place)}`);
+            }
+        } else {
+            console.error(`Coordinate non valide per il luogo: ${JSON.stringify(place)}`);
+        }
     });
 }
+
 
 export const handleNavigation = () => {
     let hash = window.location.hash || "#homepage";
@@ -107,43 +127,51 @@ export const addNewPlaceToMap = (place) => {
 
 // Funzione per creare e salvare un luogo con un ID unico persistente
 export const createPlace = (name, description, coords, img) => {
-    // Recupera i luoghi dal localStorage (o inizializza come array vuoto se non esistono)
-    const places = JSON.parse(localStorage.getItem('places')) || [];
+    // Recupera i luoghi dalla cache (usando la funzione download)
+    download().then((places) => {
+        places = places || [];
 
-    // Verifica se il luogo esiste già, altrimenti crea un nuovo luogo
-    const existingPlace = places.find(place => place.name === name);
-    
-    let place;
-    
-    if (existingPlace) {
-        // Usa l'ID esistente se il luogo esiste già
-        place = { 
-            ...existingPlace, 
-            name, 
-            description, 
-            coords, 
-            img 
-        };
-    } else {
-        // Crea un nuovo luogo con ID unico solo la prima volta
-        place = { 
-            id: uuid.v4(), // Genera un ID unico solo quando il luogo è nuovo
-            name, 
-            description, 
-            coords, 
-            img 
-        };
+        // Verifica se il luogo esiste già, altrimenti crea un nuovo luogo
+        const existingPlace = places.find(place => place.name === name);
         
-        // Aggiungi il nuovo luogo all'array dei luoghi
-        places.push(place);
-    }
+        let place;
+        
+        if (existingPlace) {
+            // Usa l'ID esistente se il luogo esiste già
+            place = { 
+                ...existingPlace, 
+                name, 
+                description, 
+                coords, 
+                img 
+            };
+        } else {
+            // Crea un nuovo luogo con ID unico solo la prima volta
+            place = { 
+                id: uuid.v4(), // Genera un ID unico solo quando il luogo è nuovo
+                name, 
+                description, 
+                coords, 
+                img 
+            };
+            
+            // Aggiungi il nuovo luogo all'array dei luoghi
+            places.push(place);
+        }
 
-    // Salva i luoghi nel localStorage
-    localStorage.setItem('places', JSON.stringify(places));
+        // Salva i luoghi nella cache (usando la funzione upload)
+        upload(places).then(() => {
+            console.log("Luogo salvato nella cache");
 
-    // Aggiungi il nuovo luogo alla tabella e mappa
-    addNewPlaceToTable(place);
-    addNewPlaceToMap(place);
+            // Aggiungi il nuovo luogo alla tabella e mappa
+            addNewPlaceToTable(place);
+            addNewPlaceToMap(place);
+        }).catch(error => {
+            console.error("Errore durante il salvataggio nella cache:", error);
+        });
+    }).catch(error => {
+        console.error("Errore durante il recupero dei luoghi dalla cache:", error);
+    });
 };
 
 export function loadConfig() {
@@ -155,4 +183,52 @@ export function loadConfig() {
         throw error;  // Propaga l'errore per gestirlo in seguito
       });
   }
+
+
+ export const updatePlaceInTable = (updatedPlace) => {
+    const rows = document.querySelectorAll('#tableAdmin tbody tr');
+    rows.forEach(row => {
+        const idCell = row.cells[0].textContent;
+        if (idCell === updatedPlace.id) {
+            row.cells[1].innerHTML = `<a href="#dettaglio_${updatedPlace.id}" class="detail-link">${updatedPlace.name}</a>`;
+            row.cells[2].textContent = updatedPlace.description;
+            row.cells[3].innerHTML = `<img class="imgAdmin" src="${updatedPlace.img}" alt="${updatedPlace.name}" />`;
+        }
+    });
+};
+
+export const removePlaceFromTable = (placeId) => {
+    const rows = document.querySelectorAll('#tableAdmin tbody tr');
+    rows.forEach(row => {
+        const idCell = row.cells[0].textContent;
+        if (idCell === placeId) {
+            row.remove();
+        }
+    });
+};
+export const updatePlaceInMap = (updatedPlace) => {
+    // Rimuovi il marker esistente
+    window.map.eachLayer(layer => {
+        if (layer instanceof L.Marker && layer.getPopup().getContent().includes(updatedPlace.name)) {
+            window.map.removeLayer(layer);
+        }
+    });
+
+    // Aggiungi il nuovo marker
+    const marker = L.marker([updatedPlace.coords[0], updatedPlace.coords[1]]).addTo(window.map);
+    marker.bindPopup(`
+        <b>${updatedPlace.name}</b><br>${updatedPlace.description}
+    `);
+};
+
+export const removePlaceFromMap = (placeId) => {
+    // Rimuovi il marker corrispondente
+    window.map.eachLayer(layer => {
+        if (layer instanceof L.Marker && layer.getPopup().getContent().includes(placeId)) {
+            window.map.removeLayer(layer);
+        }
+    });
+};
+
+
 
