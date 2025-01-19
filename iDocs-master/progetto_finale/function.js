@@ -358,8 +358,8 @@ export function editPlace(placeId) {
                         addNewPlaceToHomepageTable(newPlace);
       
                         // Pulisce il form
-                        formContainer.innerHTML = '';
-                        formContainer.style.display = "none";
+                        editContainer.innerHTML = '';
+                        editContainer.style.display = "none";
                         document.getElementById("overlay").style.display = "none";
       
                         alert("Luogo aggiunto con successo!");
