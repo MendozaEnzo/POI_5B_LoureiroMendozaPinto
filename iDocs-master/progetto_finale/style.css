@@ -5,6 +5,11 @@
 .hidden {
    display: none;
 }
+
+.azioni {
+   display: none;
+}
+
 #map {
    width: 90;
    height: 400px;
@@ -13,6 +18,11 @@
 #table {
    overflow-y: scroll;
    height: 400px;
+}
+
+#tableAdmin {
+   overflow-y: scroll;
+   height: 450px;
 }
 
 .flex-container{
@@ -34,6 +44,19 @@
       padding: 20px;
       border-radius: 10px;
       margin-top: 10px;
+}
+
+#form {
+   display: none;
+   position: fixed;
+   top: 50%;
+   left: 50%;   
+   transform: translate(-50%, -50%);
+   z-index: 1000;
+   background-color: white;
+   padding: 20px;
+   border-radius: 10px;
+   margin-top: 10px;
 }
   
 #modale {
@@ -66,4 +89,8 @@
 
 .imgAdmin {
    width: 200px;
+}
+
+#azioni {
+   display: none;
 }

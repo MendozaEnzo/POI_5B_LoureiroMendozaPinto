@@ -72,14 +72,14 @@ export function createTableAdmin() {
 
   container.innerHTML = `
     <input type="text" id="FiltroInputAdmin" placeholder="Cerca per luogo">
-    <table width="50%" class="table table-striped">
+    <table id="tableAdmin" width="50%" class="table table-striped">
       <thead>
         <tr>
           <th>ID</th>
           <th>Luogo</th>
           <th>Descrizione</th>
           <th>Immagine</th>
-          ${isLoggedIn ? '<th>Azioni</th>' : ''} <!-- Include la colonna "Azioni" solo se loggato -->
+          <th class="azioni">Azioni</th>
         </tr>
       </thead>
       <tbody>
@@ -89,12 +89,10 @@ export function createTableAdmin() {
             <td><a href="#dettaglio_${place.id}" class="detail-link">${place.name}</a></td>
             <td>${place.description}</td>
             <td><img class="imgAdmin" src="${place.img}" alt="${place.name}" /></td>
-            ${isLoggedIn ? `
-              <td>
+            <td class="azioni">
                 <button onclick="editPlace('${place.id}')">Modifica</button>
                 <button onclick="deletePlace('${place.id}')">Elimina</button>
-              </td>
-            ` : ''}
+            </td>
           </tr>
         `).join('')}
       </tbody>
@@ -154,6 +152,10 @@ export const createLogin = (elem) => {
                       if (isValid) {
                           document.getElementById("add").style.display = "block";
                           elem.style.display = "none";
+                          document.querySelectorAll(".azioni").forEach(el =>
+                            el.style.display = "block"
+                          )
+                          document.getElementById("login").style.display = "none";
                           document.getElementById("overlay").style.display = "none";
                           console.log("Accesso riuscito!");
                           alert("Benvenuto!");
@@ -192,24 +194,31 @@ export function createForm() {
 
   addButton.onclick = () => {
       // Mostra il form per aggiungere il luogo
+      formContainer.style.display = "block";
+      document.getElementById("overlay").style.display = "block";
       formContainer.innerHTML = `
-          <h3>Aggiungi un nuovo luogo</h3>
           <form id="addPlaceForm">
               <div>
                   <label for="placeName">Nome Luogo</label>
-                  <input type="text" id="placeName" required />
+              </div>
+              <div>
+                  <input type="text" id="placeName" class="input_css"required />
               </div>
               <div>
                   <label for="placeDescription">Descrizione</label>
-                  <textarea id="placeDescription" required></textarea>
+              </div>
+              <div>
+                  <textarea id="placeDescription" class="input_css" required></textarea>
               </div>
               <div>
                   <label for="placeImage">URL Immagine</label>
-                  <input type="url" id="placeImage" required />
               </div>
               <div>
-                  <button type="submit" class="btn btn-success">Aggiungi Luogo</button>
+                  <input type="url" id="placeImage" class="input_css" required />
+              </div>
+              <div style="margin-top: 10px;">
                   <button type="button" class="btn btn-danger" id="cancelAdd">Annulla</button>
+                  <button type="submit" class="btn btn-success">Aggiungi Luogo</button>
               </div>
           </form>
       `;
@@ -217,6 +226,8 @@ export function createForm() {
       // Gestisce l'annullamento del form
       document.getElementById('cancelAdd').onclick = () => {
           formContainer.innerHTML = ''; // Rimuove il form
+          formContainer.style.display = "none";
+          document.getElementById("overlay").style.display = "none";
       };
 
       // Gestisce il submit del form
@@ -266,6 +277,9 @@ export function createForm() {
 
                   // Pulisce il form
                   formContainer.innerHTML = '';
+                  formContainer.style.display = "none";
+                  document.getElementById("overlay").style.display = "none";
+
                   alert("Luogo aggiunto con successo!");
               })
               .catch((error) => {
