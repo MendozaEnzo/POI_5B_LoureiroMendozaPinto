@@ -79,21 +79,31 @@ export const handleNavigation = () => {
 
 export const showDetail = (id) => {
     console.log("ID ricevuto:", id); 
-    // Recupera la lista dei luoghi dal localStorage (se già salvati)
-    const places = JSON.parse(localStorage.getItem('places')) || [];
-    console.log("Luoghi salvati:", places);  // Log dei luoghi per il debug
+    // Recupera i dati dal sistema di cache
+    download().then((places) => {
+        places = places || []; // Se non ci sono dati, usa un array vuoto
+        console.log("Luoghi salvati:", places); // Debug per verificare i dati
 
-    // Trova il luogo che corrisponde all'ID
-    const place = places.find(p => p.id === id);
-    console.log("Luogo trovato:", place);
-    if (place) {
-        document.getElementById('detailName').innerText = place.name;
-        document.getElementById('detailDescription').innerText = place.description;
-    } else {
-        document.getElementById('detailName').innerText = 'Luogo non trovato';
-        document.getElementById('detailDescription').innerText = 'Impossibile trovare i dettagli per questo luogo.';
-    }
+        // Trova il luogo che corrisponde all'ID
+        const place = places.find(p => p.id === id);
+
+        if (place) {
+            // Popola la pagina dei dettagli con i dati del luogo trovato
+            document.getElementById('detailName').innerText = place.name;
+            document.getElementById('detailDescription').innerText = place.description || "Nessuna descrizione disponibile.";
+            document.getElementById('detailImage').src = place.img || "placeholder.jpg"; // Mostra un'immagine di default se manca
+        } else {
+            // Mostra un messaggio di errore se il luogo non è trovato
+            document.getElementById('detailName').innerText = 'Luogo non trovato';
+            document.getElementById('detailDescription').innerText = 'Impossibile trovare i dettagli per questo luogo.';
+        }
+    }).catch((error) => {
+        console.error("Errore durante il recupero dei luoghi:", error);
+        document.getElementById('detailName').innerText = 'Errore';
+        document.getElementById('detailDescription').innerText = 'Si è verificato un errore nel caricamento dei dettagli.';
+    });
 };
+
 
 export function login_fetch(username, password) {
     return new Promise((resolve, reject) => {
