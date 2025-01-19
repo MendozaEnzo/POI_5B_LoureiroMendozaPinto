@@ -15,25 +15,22 @@ export const createNavigator = (parentElement) => {
 
    const render = () => {
        const url = new URL(document.location.href);
-       const pageName = url.hash.replace("#", "") || "homepage"; // Imposta 'homepage' come predefinito
+       const pageName = url.hash.replace("#", "") || "homepage"; 
 
-       // Trova la pagina da mostrare in base all'ID nell'URL hash
+       
        const selected = pages.find((page) => page.id === pageName) || pages[0];
 
-       // Nascondi tutte le pagine e mostra quella selezionata
+       
        hide(pages);
        show(selected);
    };
 
-   // Gestisce il caricamento iniziale e il cambio di hash
-   window.addEventListener("hashchange", render); // Reagisci al cambio di hash
+   window.addEventListener("hashchange", render);
    render(); 
 };
 
-// Collegamento del navigatore
 document.addEventListener("DOMContentLoaded", () => {
    const parentElement = document.body;
    createNavigator(parentElement);
 });
 
-const login = document.getElementById("login");

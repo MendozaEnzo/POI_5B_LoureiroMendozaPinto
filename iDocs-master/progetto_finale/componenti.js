@@ -1,4 +1,4 @@
-import { handleNavigation,login_fetch,addNewPlaceToMap,addNewPlaceToTable,loadConfig,getCoordinates,carica_marker,deletePlace,updatePlaceInMap,updatePlaceInTable,removePlaceFromMap,removePlaceFromTable,addNewPlaceToHomepageTable,addCustomMarker } from "./function.js";
+import { handleNavigation,login_fetch,aggiunta_mappa,add_mappa,loadConfig,getCoordinates,carica_marker,deletePlace,modifica_mappa,mod_luogo_tabella,rimuovi_marker,rimuovi_luogo_tabella,add_mappa_tabella,aggiunta_marker } from "./function.js";
 import {download,upload} from "./cache.js";
 // Componente Mappa
 let zoom = 5;  // Zoom per vedere l'Europa
@@ -15,14 +15,13 @@ carica_marker(map)
 
  
 // Componente tabella dinamica
-// Funzione per creare la tabella con i dati scaricati
 export function createTable() {
   const container = document.getElementById('table');
 
-  // Recupera i dati dalla cache
+
   download()
     .then((places) => {
-      // Inserisce i dati nella tabella
+      
       container.innerHTML = `
         <input type="text" id="FiltroInput" placeholder="Cerca per luogo">
         <table width="50%" class="table table-striped">
@@ -47,7 +46,7 @@ export function createTable() {
         </table>
       `;
 
-      // Aggiunge la funzionalità di filtro
+      //filtro
       let filtroInput = document.getElementById('FiltroInput');
       filtroInput.oninput = function () {
         let filtro = this.value.toLowerCase();
@@ -60,7 +59,7 @@ export function createTable() {
         });
       };
 
-      // Gestisce il cambio di hash
+      //cambio di hash
       window.onhashchange = handleNavigation;
     })
     .catch((error) => {
@@ -72,12 +71,12 @@ export function createTable() {
 
 export function createTableAdmin() {
   const container = document.getElementById('tableAdmin');
-  const isLoggedIn = Cookies.get('Username'); // Verifica se l'utente è loggato
+  const isLoggedIn = Cookies.get('Username'); // verifica se l'utente è loggato
 
-  // Scarica i dati usando la funzione download
+
   download()
     .then((places) => {
-      // Genera la tabella con i dati scaricati
+      
       container.innerHTML = `
         <input type="text" id="FiltroInputAdmin" placeholder="Cerca per luogo">
         <table id="tableAdmin" width="50%" class="table table-striped">
@@ -115,7 +114,7 @@ export function createTableAdmin() {
         </table>
       `;
 
-      // Filtro per la ricerca
+      // filtro per la ricerca
       let filtroInputAdmin = document.getElementById('FiltroInputAdmin');
       filtroInputAdmin.oninput = function () {
         let filtro = this.value.toLowerCase();
@@ -128,7 +127,7 @@ export function createTableAdmin() {
         });
       };
 
-      window.onhashchange = handleNavigation; // Gestisce la navigazione con hash
+      window.onhashchange = handleNavigation; 
     })
     .catch((error) => {
       console.error('Errore durante il download dei dati:', error);
@@ -205,13 +204,12 @@ export const createLogin = (elem) => {
   };
 };
 
-// Componente Form di Aggiunta Luogo
+// componente form di aggiunta punto interesse
 export function createForm() {
   const formContainer = document.getElementById('form');
   const addButton = document.getElementById('add');
 
   addButton.onclick = () => {
-    // Mostra il form per aggiungere il luogo
     formContainer.style.display = "block";
     document.getElementById("overlay").style.display = "block";
     formContainer.innerHTML = `
@@ -241,25 +239,25 @@ export function createForm() {
       </form>
     `;
 
-    // Gestisce l'annullamento del form
+    // annulla
     document.getElementById('cancelAdd').onclick = () => {
-      formContainer.innerHTML = ''; // Rimuove il form
+      formContainer.innerHTML = '';
       formContainer.style.display = "none";
       document.getElementById("overlay").style.display = "none";
     };
 
-    // Gestisce il submit del form
+    //submit
     document.getElementById('addPlaceForm').onsubmit = (event) => {
+      //// event.preventDefault() impedisce l'azione predefinita dell'evento
       event.preventDefault();
 
       const name = document.getElementById('placeName').value;
       const description = document.getElementById('placeDescription').value;
       const img = document.getElementById('placeImage').value;
 
-      // Ottiene le coordinate del luogo
+      //coordinate del luogo
       getCoordinates([name])
         .then((location) => {
-          // Crea l'oggetto del nuovo luogo
           const newPlace = {
             id: uuid.v4(),
             name,
@@ -268,25 +266,20 @@ export function createForm() {
             coords: location.coords,
           };
 
-          // Recupera i luoghi esistenti dalla cache
           download()
             .then((places) => {
-              places = places || [];  // Se non ci sono luoghi, usa un array vuoto
+              places = places || []; 
               places.push(newPlace);
 
-              // Salva la lista aggiornata nella cache
               upload(places)
                 .then(() => {
                   console.log("Luogo salvato nella cache con successo!");
 
-                  // Aggiungi il luogo alla mappa
-                  addCustomMarker(map, newPlace, newPlace.coords);
+                  aggiunta_marker(map, newPlace, newPlace.coords);
+                  add_mappa(newPlace);
+                  add_mappa_tabella(newPlace);
 
-                  // Aggiungi il luogo alla tabella senza ricaricare la pagina
-                  addNewPlaceToTable(newPlace);
-                  addNewPlaceToHomepageTable(newPlace);
-
-                  // Pulisce il form
+                  // pulizia  form
                   formContainer.innerHTML = '';
                   formContainer.style.display = "none";
                   document.getElementById("overlay").style.display = "none";
