@@ -13,33 +13,54 @@ export const getCoordinates = (luogo) => {
     })
 };
 
-export function addMarker(places) {
-    if (!window.map|| typeof window.map.addLayer !== 'function') {
-        console.error("Errore: la mappa non è stata inizializzata correttamente.");
-        return;
-    }
-    console.log('Mappa:', window.map);
-    console.log('Luoghi salvati:', cachedPlaces);
+export function carica_marker(map) {
+    download().then((places) => {
+        places = places || []; // Inizializza un array vuoto se non ci sono luoghi salvati
+        console.log("Luoghi salvati:", places);
 
-    places.forEach((place) => {
-        // Verifica che coords sia un array valido con due valori (lat, lng)
-        if (Array.isArray(place.coords) && place.coords.length === 2) {
-            const [lat, lng] = place.coords;
+        // Aggiungi un marker per ogni luogo
+        places.forEach((place) => {
+            if (Array.isArray(place.coords) && place.coords.length === 2) {
+                const [lat, lng] = place.coords;
 
-            // Crea un marker solo se le coordinate sono numeriche
-            if (!isNaN(lat) && !isNaN(lng)) {
-                const marker = L.marker([parseFloat(lat), parseFloat(lng)]).bindPopup(`
-                    <b>${place.name}</b><br>
-                    ${place.description || "Nessuna descrizione disponibile."}
-                `).addTo(window.map);
+                // Aggiungi il marker solo se le coordinate sono valide
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const marker = L.marker([parseFloat(lat), parseFloat(lng)]).addTo(map);
+                    marker.bindPopup(`
+                        <b>${place.name}</b><br>
+                        ${place.description || "Nessuna descrizione disponibile."}
+                    `);
+                } else {
+                    console.error(`Coordinate non numeriche per il luogo: ${JSON.stringify(place)}`);
+                }
             } else {
-                console.error(`Coordinate non numeriche per il luogo: ${JSON.stringify(place)}`);
+                console.error(`Coordinate non valide per il luogo: ${JSON.stringify(place)}`);
             }
-        } else {
-            console.error(`Coordinate non valide per il luogo: ${JSON.stringify(place)}`);
-        }
+        });
+    }).catch((error) => {
+        console.error("Errore durante il download dei luoghi:", error);
     });
 }
+export function addCustomMarker(map, newPlace, newCoords) {
+    if (Array.isArray(newCoords) && newCoords.length === 2) {
+      const [lat, lng] = newCoords;
+  
+      // Aggiungi il marker solo se le coordinate sono valide
+      if (!isNaN(lat) && !isNaN(lng)) {
+        const marker = L.marker([parseFloat(lat), parseFloat(lng)]).addTo(map);
+        marker.bindPopup(`
+          <b>${newPlace.name}</b><br>
+          ${newPlace.description || "Nessuna descrizione disponibile."}
+        `);
+      } else {
+        console.error(`Coordinate non numeriche per il luogo: ${JSON.stringify(newPlace)}`);
+      }
+    } else {
+      console.error(`Coordinate non valide per il luogo: ${JSON.stringify(newPlace)}`);
+    }
+  }
+  
+
 
 
 export const handleNavigation = () => {
@@ -104,6 +125,7 @@ export function login_fetch(username, password) {
 }
 // Funzione per aggiungere il nuovo luogo alla tabella
 export const addNewPlaceToTable = (place) => {
+    console.log("Aggiungendo luogo alla tabella:", place);    
     const container = document.getElementById('tableAdmin').querySelector('tbody');
     container.innerHTML += `
         <tr>
@@ -111,9 +133,25 @@ export const addNewPlaceToTable = (place) => {
             <td><a href="#dettaglio_${place.id}" class="detail-link">${place.name}</a></td>
             <td>${place.description}</td>
             <td><img class="imgAdmin" src="${place.img}" alt="${place.name}" /></td>
+            <td class="azioni">
+                <button style="display:block;" onclick="editPlace('${place.id}')">Modifica</button>
+                <button style="display:block;" onclick="deletePlace('${place.id}')">Elimina</button>
+            </td>
         </tr>
     `;
 };
+
+// Funzione per aggiungere il nuovo luogo alla tabella della homepage
+export const addNewPlaceToHomepageTable = (place) => {
+    const container = document.getElementById('table');
+    container.innerHTML += `
+        <tr>
+                <td>${place.id}</td>
+                <td><a href="#dettaglio_${place.id}" class="detail-link">${place.name}</a></td>
+        </tr>
+    `;
+};
+
 
 // Funzione per aggiungere il nuovo luogo alla mappa
 export const addNewPlaceToMap = (place) => {
@@ -163,9 +201,10 @@ export const createPlace = (name, description, coords, img) => {
         upload(places).then(() => {
             console.log("Luogo salvato nella cache");
 
-            // Aggiungi il nuovo luogo alla tabella e mappa
+            // Aggiungi il nuovo luogo alla tabella, mappa e homepage
             addNewPlaceToTable(place);
             addNewPlaceToMap(place);
+            addNewPlaceToHomepageTable(place);  // Aggiungi il luogo anche nella tabella della homepage
         }).catch(error => {
             console.error("Errore durante il salvataggio nella cache:", error);
         });
@@ -174,6 +213,7 @@ export const createPlace = (name, description, coords, img) => {
     });
 };
 
+//funzione per la login
 export function loadConfig() {
     return fetch('conf.json')
       .then(response => response.json())
@@ -183,6 +223,35 @@ export function loadConfig() {
         throw error;  // Propaga l'errore per gestirlo in seguito
       });
   }
+
+// Elimina un punto di interesse
+// functions.js
+export function deletePlace(placeId) {
+    download().then((places) => {
+      places = places || [];
+  
+      const placeIndex = places.findIndex(place => place.id === placeId);
+      if (placeIndex !== -1) {
+        const deletedPlace = places.splice(placeIndex, 1)[0];
+        //removePlaceFromMap(deletedPlace.id);
+        removePlaceFromTable(deletedPlace.id);
+        removeTableHomepage(deletedPlace.id);
+  
+        upload(places).then(() => {
+          console.log('Luogo eliminato con successo');
+        }).catch((error) => {
+          console.error('Errore durante l\'upload dei luoghi aggiornati:', error);
+        });
+      }
+    }).catch((error) => {
+      console.error('Errore durante il download dei luoghi:', error);
+    });
+  }
+  
+  // Lega la funzione a window per renderla globale
+  window.deletePlace = deletePlace;
+  
+
 
 
  export const updatePlaceInTable = (updatedPlace) => {
@@ -197,6 +266,7 @@ export function loadConfig() {
     });
 };
 
+
 export const removePlaceFromTable = (placeId) => {
     const rows = document.querySelectorAll('#tableAdmin tbody tr');
     rows.forEach(row => {
@@ -206,6 +276,16 @@ export const removePlaceFromTable = (placeId) => {
         }
     });
 };
+export const removeTableHomepage = (placeId) =>{
+    const rows = document.querySelectorAll('#table tbody tr');
+    rows.forEach(row => {
+        const idCell = row.cells[0].textContent;
+        if (idCell === placeId) {
+            row.remove();
+        }
+    });
+}
+
 export const updatePlaceInMap = (updatedPlace) => {
     // Rimuovi il marker esistente
     window.map.eachLayer(layer => {
@@ -229,6 +309,7 @@ export const removePlaceFromMap = (placeId) => {
         }
     });
 };
+
 
 
 

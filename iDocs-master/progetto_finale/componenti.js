@@ -1,4 +1,4 @@
-import { handleNavigation,login_fetch,addNewPlaceToMap,addNewPlaceToTable,loadConfig,getCoordinates,addMarker,updatePlaceInMap,updatePlaceInTable,removePlaceFromMap,removePlaceFromTable } from "./function.js";
+import { handleNavigation,login_fetch,addNewPlaceToMap,addNewPlaceToTable,loadConfig,getCoordinates,carica_marker,deletePlace,updatePlaceInMap,updatePlaceInTable,removePlaceFromMap,removePlaceFromTable,addNewPlaceToHomepageTable,addCustomMarker } from "./function.js";
 import {download,upload} from "./cache.js";
 // Componente Mappa
 let zoom = 5;  // Zoom per vedere l'Europa
@@ -9,112 +9,129 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: maxZoom,
     attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
-
+carica_marker(map)
  
 
 
  
 // Componente tabella dinamica
+// Funzione per creare la tabella con i dati scaricati
 export function createTable() {
   const container = document.getElementById('table');
 
-  const places = [
-      { id: uuid.v4(), name: 'Piazza S. Fedele (Milano)', description: 'La chiesa di San Fedele è famosa...' },
-      { id: uuid.v4(), name: 'Colosseo (Roma)', description: 'Il Colosseo è un antico anfiteatro di Roma...' },
-      { id: uuid.v4(), name: 'Piazza del Duomo (Firenze)', description: 'La piazza del Duomo di Firenze è famosa per la cattedrale...' }
-  ];
+  // Recupera i dati dalla cache
+  download()
+    .then((places) => {
+      // Inserisce i dati nella tabella
+      container.innerHTML = `
+        <input type="text" id="FiltroInput" placeholder="Cerca per luogo">
+        <table width="50%" class="table table-striped">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Luogo</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${places
+              .map(
+                (place) => `
+              <tr>
+                <td>${place.id}</td>
+                <td><a href="#dettaglio_${place.id}" class="detail-link">${place.name}</a></td>
+              </tr>
+            `
+              )
+              .join('')}
+          </tbody>
+        </table>
+      `;
 
-  container.innerHTML = `
-    <input type="text" id="FiltroInput" placeholder="Cerca per luogo">
-    <table widht="50%" class="table table-striped">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Luogo</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${places.map(place => `
-          <tr>
-            <td>${place.id}</td>
-            <td><a href="#dettaglio_${place.id}" class="detail-link">${place.name}</a></td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
-
-  let filtroInput = document.getElementById('FiltroInput');
-
-  filtroInput.oninput = function() {
-      let filtro = this.value.toLowerCase();
-      document.querySelectorAll('tbody tr').forEach(riga => {
+      // Aggiunge la funzionalità di filtro
+      let filtroInput = document.getElementById('FiltroInput');
+      filtroInput.oninput = function () {
+        let filtro = this.value.toLowerCase();
+        document.querySelectorAll('tbody tr').forEach((riga) => {
           if (riga.textContent.toLowerCase().includes(filtro)) {
-              riga.style.display = '';
+            riga.style.display = '';
           } else {
-              riga.style.display = 'none';
+            riga.style.display = 'none';
           }
-      });
-  };
+        });
+      };
 
-  window.onhashchange = handleNavigation;
+      // Gestisce il cambio di hash
+      window.onhashchange = handleNavigation;
+    })
+    .catch((error) => {
+      console.error('Errore durante il download dei dati:', error);
+      alert('Errore nel caricamento dei dati.');
+    });
 }
+
 
 export function createTableAdmin() {
   const container = document.getElementById('tableAdmin');
   const isLoggedIn = Cookies.get('Username'); // Verifica se l'utente è loggato
 
-  const places = [
-    { id: uuid.v4(), name: 'Piazza S. Fedele (Milano)', description: 'La chiesa di San Fedele è famosa...', img: 'https://www.milanofree.it/images/stories/foto_storiche_milano/porta_venezia_1876_inaugurazione_ippovia_per_monza.jpg' },
-    { id: uuid.v4(), name: 'Colosseo (Roma)', description: 'Il Colosseo è un antico anfiteatro di Roma...', img: 'https://www.milanofree.it/images/stories/foto_storiche_milano/porta_venezia_1876_inaugurazione_ippovia_per_monza.jpg' },
-    { id: uuid.v4(), name: 'Piazza del Duomo (Firenze)', description: 'La piazza del Duomo di Firenze è famosa per la cattedrale...', img: 'https://www.milanofree.it/images/stories/foto_storiche_milano/porta_venezia_1876_inaugurazione_ippovia_per_monza.jpg' }
-  ];
+  // Scarica i dati usando la funzione download
+  download()
+    .then((places) => {
+      // Genera la tabella con i dati scaricati
+      container.innerHTML = `
+        <input type="text" id="FiltroInputAdmin" placeholder="Cerca per luogo">
+        <table id="tableAdmin" width="50%" class="table table-striped">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Luogo</th>
+              <th>Descrizione</th>
+              <th>Immagine</th>
+              <th class="azioni">Azioni</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${places
+              .map(
+                (place) => `
+              <tr>
+                <td>${place.id}</td>
+                <td><a href="#dettaglio_${place.id}" class="detail-link">${place.name}</a></td>
+                <td>${place.description}</td>
+                <td><img class="imgAdmin" src="${place.img}" alt="${place.name}" /></td>
+                <td class="azioni">
+                    <button onclick="editPlace('${place.id}')">Modifica</button>
+                    <button onclick="deletePlace('${place.id}')">Elimina</button>
 
-  container.innerHTML = `
-    <input type="text" id="FiltroInputAdmin" placeholder="Cerca per luogo">
-    <table id="tableAdmin" width="50%" class="table table-striped">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Luogo</th>
-          <th>Descrizione</th>
-          <th>Immagine</th>
-          <th class="azioni">Azioni</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${places.map(place => `
-          <tr>
-            <td>${place.id}</td>
-            <td><a href="#dettaglio_${place.id}" class="detail-link">${place.name}</a></td>
-            <td>${place.description}</td>
-            <td><img class="imgAdmin" src="${place.img}" alt="${place.name}" /></td>
-            <td class="azioni">
-                <button onclick="editPlace('${place.id}')">Modifica</button>
-                <button onclick="deletePlace('${place.id}')">Elimina</button>
-            </td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
+                </td>
+              </tr>
+            `
+              )
+              .join('')}
+          </tbody>
+        </table>
+      `;
 
-  // Filtro per la ricerca
-  let filtroInputAdmin = document.getElementById('FiltroInputAdmin');
-  filtroInputAdmin.oninput = function () {
-    let filtro = this.value.toLowerCase();
-    document.querySelectorAll('tbody tr').forEach(riga => {
-      if (riga.textContent.toLowerCase().includes(filtro)) {
-        riga.style.display = '';
-      } else {
-        riga.style.display = 'none';
-      }
+      // Filtro per la ricerca
+      let filtroInputAdmin = document.getElementById('FiltroInputAdmin');
+      filtroInputAdmin.oninput = function () {
+        let filtro = this.value.toLowerCase();
+        document.querySelectorAll('tbody tr').forEach((riga) => {
+          if (riga.textContent.toLowerCase().includes(filtro)) {
+            riga.style.display = '';
+          } else {
+            riga.style.display = 'none';
+          }
+        });
+      };
+
+      window.onhashchange = handleNavigation; // Gestisce la navigazione con hash
+    })
+    .catch((error) => {
+      console.error('Errore durante il download dei dati:', error);
+      container.innerHTML = '<p>Errore nel caricamento dei dati. Riprova più tardi.</p>';
     });
-  };
-
-  window.onhashchange = handleNavigation;
 }
-
 
 
 
@@ -186,94 +203,85 @@ export const createLogin = (elem) => {
 };
 
 // Componente Form di Aggiunta Luogo
-
-// Componente Form di Aggiunta Luogo
 export function createForm() {
   const formContainer = document.getElementById('form');
   const addButton = document.getElementById('add');
 
   addButton.onclick = () => {
-      // Mostra il form per aggiungere il luogo
-      formContainer.style.display = "block";
-      document.getElementById("overlay").style.display = "block";
-      formContainer.innerHTML = `
-          <form id="addPlaceForm">
-              <div>
-                  <label for="placeName">Nome Luogo</label>
-              </div>
-              <div>
-                  <input type="text" id="placeName" class="input_css"required />
-              </div>
-              <div>
-                  <label for="placeDescription">Descrizione</label>
-              </div>
-              <div>
-                  <textarea id="placeDescription" class="input_css" required></textarea>
-              </div>
-              <div>
-                  <label for="placeImage">URL Immagine</label>
-              </div>
-              <div>
-                  <input type="url" id="placeImage" class="input_css" required />
-              </div>
-              <div style="margin-top: 10px;">
-                  <button type="button" class="btn btn-danger" id="cancelAdd">Annulla</button>
-                  <button type="submit" class="btn btn-success">Aggiungi Luogo</button>
-              </div>
-          </form>
-      `;
+    // Mostra il form per aggiungere il luogo
+    formContainer.style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+    formContainer.innerHTML = `
+      <form id="addPlaceForm">
+        <div>
+          <label for="placeName">Nome Luogo</label>
+        </div>
+        <div>
+          <input type="text" id="placeName" class="input_css" required />
+        </div>
+        <div>
+          <label for="placeDescription">Descrizione</label>
+        </div>
+        <div>
+          <textarea id="placeDescription" class="input_css" required></textarea>
+        </div>
+        <div>
+          <label for="placeImage">URL Immagine</label>
+        </div>
+        <div>
+          <input type="url" id="placeImage" class="input_css" required />
+        </div>
+        <div style="margin-top: 10px;">
+          <button type="button" class="btn btn-danger" id="cancelAdd">Annulla</button>
+          <button type="submit" class="btn btn-success">Aggiungi Luogo</button>
+        </div>
+      </form>
+    `;
 
-      // Gestisce l'annullamento del form
-      document.getElementById('cancelAdd').onclick = () => {
-          formContainer.innerHTML = ''; // Rimuove il form
-          formContainer.style.display = "none";
-          document.getElementById("overlay").style.display = "none";
-      };
+    // Gestisce l'annullamento del form
+    document.getElementById('cancelAdd').onclick = () => {
+      formContainer.innerHTML = ''; // Rimuove il form
+      formContainer.style.display = "none";
+      document.getElementById("overlay").style.display = "none";
+    };
 
-      // Gestisce il submit del form
-      document.getElementById('addPlaceForm').onsubmit = (event) => {
-          event.preventDefault();
+    // Gestisce il submit del form
+    document.getElementById('addPlaceForm').onsubmit = (event) => {
+      event.preventDefault();
 
-          const name = document.getElementById('placeName').value;
-          const description = document.getElementById('placeDescription').value;
-          const img = document.getElementById('placeImage').value;
+      const name = document.getElementById('placeName').value;
+      const description = document.getElementById('placeDescription').value;
+      const img = document.getElementById('placeImage').value;
 
-          // Ottiene le coordinate del luogo
-          getCoordinates([name])
-              .then((location) => {
-                  // Crea l'oggetto del nuovo luogo
-                  const newPlace = {
-                      id: uuid.v4(),
-                      name,
-                      description,
-                      img,
-                      coords: location.coords
-                  };
+      // Ottiene le coordinate del luogo
+      getCoordinates([name])
+        .then((location) => {
+          // Crea l'oggetto del nuovo luogo
+          const newPlace = {
+            id: uuid.v4(),
+            name,
+            description,
+            img,
+            coords: location.coords,
+          };
 
-                  // Aggiunge il luogo alla tabella e alla mappa
+          // Recupera i luoghi esistenti dalla cache
+          download()
+            .then((places) => {
+              places = places || [];  // Se non ci sono luoghi, usa un array vuoto
+              places.push(newPlace);
+
+              // Salva la lista aggiornata nella cache
+              upload(places)
+                .then(() => {
+                  console.log("Luogo salvato nella cache con successo!");
+
+                  // Aggiungi il luogo alla mappa
+                  addCustomMarker(map, newPlace, newPlace.coords);
+
+                  // Aggiungi il luogo alla tabella senza ricaricare la pagina
                   addNewPlaceToTable(newPlace);
-                  addMarker([newPlace]); // Aggiunge il marker alle mappe (homepage e admin)
-
-                  // Recupera i luoghi dalla cache
-                  download()
-                      .then((cachedPlaces) => {
-                          cachedPlaces = cachedPlaces || [];
-
-                          // Aggiunge il nuovo luogo alla lista dei luoghi
-                          cachedPlaces.push(newPlace);
-
-                          // Salva i luoghi aggiornati nella cache
-                          upload(cachedPlaces)
-                              .then(() => {
-                                  console.log("Luogo salvato nella cache con successo!");
-                              })
-                              .catch((error) => {
-                                  console.error("Errore durante il salvataggio nella cache:", error);
-                              });
-                      })
-                      .catch((error) => {
-                          console.error("Errore durante il recupero dei luoghi dalla cache:", error);
-                      });
+                  addNewPlaceToHomepageTable(newPlace);
 
                   // Pulisce il form
                   formContainer.innerHTML = '';
@@ -281,17 +289,28 @@ export function createForm() {
                   document.getElementById("overlay").style.display = "none";
 
                   alert("Luogo aggiunto con successo!");
-              })
-              .catch((error) => {
-                  console.error("Errore durante l'aggiunta del luogo:", error);
-                  alert("Si è verificato un errore. Controlla i dettagli.");
-              });
-      };
+                })
+                .catch((error) => {
+                  console.error("Errore durante il salvataggio nella cache:", error);
+                });
+            })
+            .catch((error) => {
+              console.error("Errore durante il recupero dei luoghi dalla cache:", error);
+              alert("Si è verificato un errore. Controlla i dettagli.");
+            });
+        })
+        .catch((error) => {
+          console.error("Errore durante l'aggiunta del luogo:", error);
+          alert("Si è verificato un errore. Controlla i dettagli.");
+        });
+    };
   };
 }
 
 // Inizializza il form
 createForm();
+
+
 
 
 
