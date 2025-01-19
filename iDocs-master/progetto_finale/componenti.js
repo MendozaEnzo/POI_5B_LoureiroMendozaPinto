@@ -100,9 +100,12 @@ export function createTableAdmin() {
                 <td>${place.description}</td>
                 <td><img class="imgAdmin" src="${place.img}" alt="${place.name}" /></td>
                 <td class="azioni">
-                    <button onclick="editPlace('${place.id}')">Modifica</button>
-                    <button onclick="deletePlace('${place.id}')">Elimina</button>
-
+                  <div>
+                    <button class="btn btn-warning" onclick="editPlace('${place.id}')">Modifica</button>
+                  </div>
+                  <div>
+                    <button style="margin-top: 10px;" class="btn btn-danger" onclick="deletePlace('${place.id}')">Elimina</button>
+                  </div>
                 </td>
               </tr>
             `

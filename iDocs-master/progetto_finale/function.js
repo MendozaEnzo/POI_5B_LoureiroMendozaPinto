@@ -1,5 +1,9 @@
 import { upload,download } from "./cache.js";
 
+var markers = L.markerClusterGroup({
+    disableClusteringAtZoom: 1
+});;
+
 export const getCoordinates = (luogo) => {
     console.log(luogo);
     return new Promise((resolve) => {
@@ -25,11 +29,17 @@ export function carica_marker(map) {
 
                 // Aggiungi il marker solo se le coordinate sono valide
                 if (!isNaN(lat) && !isNaN(lng)) {
-                    const marker = L.marker([parseFloat(lat), parseFloat(lng)]).addTo(map);
+                    const marker = L.marker([parseFloat(lat), parseFloat(lng)]);
                     marker.bindPopup(`
                         <b>${place.name}</b><br>
                         ${place.description || "Nessuna descrizione disponibile."}
+                    
                     `);
+
+                    markers.addLayer(marker)
+
+                    map.addLayer(markers);
+
                 } else {
                     console.error(`Coordinate non numeriche per il luogo: ${JSON.stringify(place)}`);
                 }
@@ -47,11 +57,16 @@ export function addCustomMarker(map, newPlace, newCoords) {
   
       // Aggiungi il marker solo se le coordinate sono valide
       if (!isNaN(lat) && !isNaN(lng)) {
-        const marker = L.marker([parseFloat(lat), parseFloat(lng)]).addTo(map);
+        const marker = L.marker([parseFloat(lat), parseFloat(lng)]);
         marker.bindPopup(`
           <b>${newPlace.name}</b><br>
           ${newPlace.description || "Nessuna descrizione disponibile."}
         `);
+
+        markers.addLayer(marker)
+
+        map.addLayer(markers);
+
       } else {
         console.error(`Coordinate non numeriche per il luogo: ${JSON.stringify(newPlace)}`);
       }
@@ -143,9 +158,9 @@ export const addNewPlaceToTable = (place) => {
             <td><a href="#dettaglio_${place.id}" class="detail-link">${place.name}</a></td>
             <td>${place.description}</td>
             <td><img class="imgAdmin" src="${place.img}" alt="${place.name}" /></td>
-            <td class="azioni">
-                <button style="display:block;" onclick="editPlace('${place.id}')">Modifica</button>
-                <button style="display:block;" onclick="deletePlace('${place.id}')">Elimina</button>
+            <td>
+                <button class="btn btn-warning" onclick="editPlace('${place.id}')">Modifica</button>
+                <button style="margin-top: 10px;" class="btn btn-danger" onclick="deletePlace('${place.id}')">Elimina</button>
             </td>
         </tr>
     `;
@@ -165,10 +180,14 @@ export const addNewPlaceToHomepageTable = (place) => {
 
 // Funzione per aggiungere il nuovo luogo alla mappa
 export const addNewPlaceToMap = (place) => {
-    const marker = L.marker([place.coords[0], place.coords[1]]).addTo(map);
+    const marker = L.marker([place.coords[0], place.coords[1]]);
     marker.bindPopup(`
         <b>${place.name}</b><br>${place.description}
     `);
+
+    markers.addLayer(marker)
+
+    map.addLayer(markers);
 };
 
 
@@ -234,6 +253,135 @@ export function loadConfig() {
       });
   }
 
+export function editPlace(placeId) {
+    const editContainer = document.getElementById('edit');
+
+    editContainer.style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+    editContainer.innerHTML = `
+      <form id="editPlace">
+        <div>
+          <label for="placeName">Nome Luogo</label>
+        </div>
+        <div>
+          <input type="text" id="placeNameEdit" class="input_css" required />
+        </div>
+        <div>
+          <label for="placeDescription">Descrizione</label>
+        </div>
+        <div>
+          <textarea id="placeDescriptionEdit" class="input_css" required></textarea>
+        </div>
+        <div>
+          <label for="placeImage">URL Immagine</label>
+        </div>
+        <div>
+          <input type="url" id="placeImageEdit" class="input_css" required />
+        </div>
+        <div style="margin-top: 10px;">
+          <div>
+            <button type="button" class="btn btn-danger" id="cancelEdit">Annulla</button>
+          </div>
+          <div>
+            <button type="submit" class="btn btn-warning">Modifica Luogo</button>
+          </div>
+        </div>
+      </form>
+    `;
+    
+    const nameEdit = document.getElementById("placeNameEdit")
+    const descriptionEdit = document.getElementById("placeDescriptionEdit")
+    const imgEdit = document.getElementById("placeImageEdit")
+
+    download().then((places) => {
+        places = places || [];
+    
+        const placeIndex = places.findIndex(place => place.id === placeId);
+        if (placeIndex !== -1) {
+          const editedPlace = places.splice(placeIndex, 1)[0];
+          nameEdit.value = editedPlace.name
+          descriptionEdit.value = editedPlace.description
+          imgEdit.value = editedPlace.img
+        }
+      }).catch((error) => {
+        console.error('Errore durante il download dei luoghi:', error);
+      });
+
+      document.getElementById('cancelEdit').onclick = () => {
+        editContainer.innerHTML = ''; // Rimuove il form
+        editContainer.style.display = "none";
+        document.getElementById("overlay").style.display = "none";
+      };
+
+      document.getElementById('editPlace').onsubmit = (event) => {
+        event.preventDefault();
+
+        upload(places).then(() => {
+            removeMarker()
+            console.log('Luogo eliminato con successo');
+          }).catch((error) => {
+            console.error('Errore durante l\'upload dei luoghi aggiornati:', error);
+          });
+
+        nameEdit = document.getElementById('placeName').value;
+        descriptionEdit = document.getElementById('placeDescription').value;
+        imgEdit = document.getElementById('placeImage').value;
+      
+            // Ottiene le coordinate del luogo
+            getCoordinates([nameEdit])
+              .then((location) => {
+                // Crea l'oggetto del nuovo luogo
+                const newPlace = {
+                  id: uuid.v4(),
+                  nameEdit,
+                  descriptionEdit,
+                  imgEdit,
+                  coords: location.coords,
+                };
+      
+                // Recupera i luoghi esistenti dalla cache
+                download()
+                  .then((places) => {
+                    places = places || [];  // Se non ci sono luoghi, usa un array vuoto
+                    places.push(newPlace);
+      
+                    // Salva la lista aggiornata nella cache
+                    upload(places)
+                      .then(() => {
+                        console.log("Luogo salvato nella cache con successo!");
+      
+                        // Aggiungi il luogo alla mappa
+                        addCustomMarker(map, newPlace, newPlace.coords);
+      
+                        // Aggiungi il luogo alla tabella senza ricaricare la pagina
+                        addNewPlaceToTable(newPlace);
+                        addNewPlaceToHomepageTable(newPlace);
+      
+                        // Pulisce il form
+                        formContainer.innerHTML = '';
+                        formContainer.style.display = "none";
+                        document.getElementById("overlay").style.display = "none";
+      
+                        alert("Luogo aggiunto con successo!");
+                      })
+                      .catch((error) => {
+                        console.error("Errore durante il salvataggio nella cache:", error);
+                      });
+                  })
+                  .catch((error) => {
+                    console.error("Errore durante il recupero dei luoghi dalla cache:", error);
+                    alert("Si è verificato un errore. Controlla i dettagli.");
+                  });
+              })
+              .catch((error) => {
+                console.error("Errore durante l'aggiunta del luogo:", error);
+                alert("Si è verificato un errore. Controlla i dettagli.");
+              });
+          };
+        }
+    // Lega la funzione a window per renderla globale
+    window.editPlace = editPlace;
+
 // Elimina un punto di interesse
 // functions.js
 export function deletePlace(placeId) {
@@ -248,6 +396,7 @@ export function deletePlace(placeId) {
         removeTableHomepage(deletedPlace.id);
   
         upload(places).then(() => {
+          removeMarker()
           console.log('Luogo eliminato con successo');
         }).catch((error) => {
           console.error('Errore durante l\'upload dei luoghi aggiornati:', error);
@@ -295,6 +444,10 @@ export const removeTableHomepage = (placeId) =>{
         }
     });
 }
+export const removeMarker = () => {
+    markers.clearLayers();
+    carica_marker(map)
+} 
 
 export const updatePlaceInMap = (updatedPlace) => {
     // Rimuovi il marker esistente
