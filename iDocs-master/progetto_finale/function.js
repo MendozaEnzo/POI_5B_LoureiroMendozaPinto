@@ -11,7 +11,7 @@ var markers = L.markerClusterGroup({
 export const getCoordinates = (luogo) => {
     console.log(luogo);
     return new Promise((resolve) => {
-        fetch("conf.json").then(r => r.json()).then(confData => {
+        fetch("./conf.json").then(r => r.json()).then(confData => {
             fetch(confData.geoUrl.replace("$LUOGO", luogo[0])).then(r => r.json()).then(data => {
                 let object = { name: luogo[0], coords: [data[0].lat, data[0].lon] };
                 console.log(object);
@@ -203,11 +203,11 @@ export const showDetail = (id) => {
 //funzionamento login
 export function login_fetch(username, password) {
     return new Promise((resolve, reject) => {
-        fetch("conf.json")
+        fetch("./conf.json")
             .then(r => r.json())
             .then(confData => {
                 if (!confData.token) {
-                    console.error("Token non trovato in conf.json");
+                    console.error("Token non trovato in ./conf.json");
                     return;
                 }
 
@@ -231,7 +231,7 @@ export function login_fetch(username, password) {
 }
 //funzione per la login
 export function loadConfig() {
-    return fetch('conf.json')
+    return fetch('././conf.json')
       .then(response => response.json())
       .then(config => config.tokenMap) // rrestituisce il tokenMap
       .catch(error => {

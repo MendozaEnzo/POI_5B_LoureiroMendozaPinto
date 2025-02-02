@@ -1,6 +1,6 @@
 const upload = (data) => {
   return new Promise((resolve, reject) => {
-    fetch("conf.json")
+    fetch("./conf.json")
       .then((r) => r.json())
       .then((confData) => {
         try {
@@ -30,7 +30,7 @@ const upload = (data) => {
 
 const download = () => {
   return new Promise((resolve, reject) => {
-    fetch("conf.json")
+    fetch("./conf.json")
       .then((r) => r.json())
       .then((confData) => {
         try {
