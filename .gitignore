@@ -8,7 +8,7 @@ lerna-debug.log*
 .pnpm-debug.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+report.[0-9].[0-9].[0-9].[0-9].json
 
 # Runtime data
 pids
@@ -41,6 +41,8 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+package-lock.json
+conf.json
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
@@ -128,10 +130,3 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-.DS_Store
-
-
-node_modules/
-package-lock.json
-package.json
-iDocs-master/progetto_finale/conf.json
