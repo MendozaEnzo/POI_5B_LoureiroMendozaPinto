@@ -129,3 +129,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .DS_Store
+
+
+node_modules/
+package-lock.json
+package.json
+iDocs-master/progetto_finale/conf.json
